@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html ng-app="toDoApp" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>ToDoApp</title>
+</head>
+<body>
+    <!-- <div class="background__pent-1"></div> -->
+    <!-- <div class="background__pent-2"></div>  -->
+    <div class="container" ng-controller="controladorGeneral as appCtrl">
+        <div class="wrapper">
+            <div ng-show="appCtrl.spinner" id="cover">
+                <div ng-show="appCtrl.spinner" id="spinner"></div>
+            </div>
+            <nav class="wrapper__header">
+                <form name="validateListForm" novalidate class="wrapper__header-form">
+                    <input required minlength="1" maxlength="30" ng-model="appCtrl.taskListAdd" type="text" class="wrapper__header-input" placeholder="Crea una lista...">
+                    <button ng-disabled="validateListForm.$invalid" ng-click="appCtrl.toggleCreateList();" class="create__tasklist">
+                        <img class="wrapper__header-icon--image" src="assets/{{appCtrl.toggleList}}-icon.svg" alt="confirm">
+                    </button>
+                </form>
+            </nav>
+            <section ng-if= "appCtrl.steps.taskListMain" class="card__wrapper">
+                <h2 ng-if="appCtrl.noListHere" class="task__card-empty">Agrega algo aqui...</h2>
+                <div class="card" ng-repeat = "cards in appCtrl.taskListData" >
+                    <div ng-click ="appCtrl.openTaskList(cards.id,cards.name,cards.tasks,$index)" class="card__info">
+                        <p class="card__info-name">{{cards.name}}</p>
+                    </div>
+                    <div class="card__edit" ng-click ="appCtrl.prepareEditingList($index, cards.name,cards.id)">
+                        <img class="card__edit-img" src="assets/edit-icon.svg" alt="edit">
+                    </div>
+                    <div class="card__delete" ng-click ="appCtrl.deleteList($index,cards.id)">
+                        <img class="card__delete-img" src="assets/delete-icon.svg" alt="delete">
+                    </div>
+                </div> 
+            </section>
+            <section ng-if="appCtrl.steps.taskListIsOpen" class="task">
+                <form name = "formTask">
+                <div class="task__name">
+                    <input required ng-model="appCtrl.taskListName" type="text" class="task__name-input" placeholder="Nombre de la lista...">
+                </div>
+                <div class="task__add">
+                    <input required minlength="1" maxlength="30" ng-model="appCtrl.taskName" type="text" class="task__add-input" placeholder="Que no se te olvide...">
+                    <button ng-disabled="formTask.$invalid" class="task__add-input-btn" ng-click = "appCtrl.toggleTask()">
+                        <img  class="task__add-input--img" src="assets/{{appCtrl.addToggle}}-icon.svg" alt="agregar">
+                    </button>
+                </div>
+            </form>
+            </section>
+            <section ng-if="appCtrl.steps.taskListIsOpen" class="task__items">
+                <h2 ng-if="appCtrl.noTaskHere" class="task__card-empty">Agrega algo aqui...</h2>
+                <div class="task__card" ng-repeat="task in appCtrl.taskListItems">
+                    <div class="task__card--checked">
+                        <input class="task__card-checkbox" id="task__card-checkbox--{{task.id}}" type="checkbox">
+                        <label class="task__card-label" for="task__card-checkbox--{{task.id}}">
+                            <img class="task__card--checked-img" src="assets/checked-icon.svg" alt="checked">
+                        </label>
+                    </div>
+                    <div class="task__card--info">
+                        <p class="task__card--info-date">{{task.creationDate | date: yMMdd}}</p>
+                        <p class="task__card--info-deadLine">{{task.limitDate | date: yMMdd}}</p>
+                        <p class="task__card--info-name">{{task.name}}</p>
+                    </div>
+                    <div class="task__card--edit" ng-click ="appCtrl.prepareEditingTask($index,task.name,task.id)">
+                        <img class="task__card--edit-img" src="assets/edit-icon.svg" alt="edit">
+                    </div>
+                    <div class="task__card--delete" ng-click ="appCtrl.deleteTask($index,task.id)">
+                        <img class="task__card--delete-img" src="assets/delete-icon.svg" alt="delete">
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </div>
+    <script src="js/lib/angular.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="node_modules/moment/moment.js"></script>
+    <script src="node_modules/angular-moment/angular-moment.js"></script>
+</body>
+</html>
