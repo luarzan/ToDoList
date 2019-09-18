@@ -63,6 +63,8 @@
             vm.steps.viewTasks = false;
             vm.toggleList = "checked";
             vm.taskListAdd = "";
+            vm.flagList.add = true;
+            vm.flagList.edit = false;
         }
         //Función para verificar si la lista de tareas esta vacia
         function checkIfEmpty(){

@@ -497,9 +497,11 @@ text-align: center;
 .task__card-checkbox{
     display: none;
 }
-/* .task__card-checkbox:checked ~ .task__card-label{
-    background: linear-gradient(to bottom, var(--blueMain), var(--blueSecond));
-} */
+
+
+
+
+
 .isChecked{
     background: linear-gradient(to bottom, var(--blueMain), var(--blueSecond));
 }
