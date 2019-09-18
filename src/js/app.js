@@ -1,6 +1,7 @@
     var app = angular.module('toDoApp',['angularMoment'])
     app.controller('controladorGeneral', ['$http','moment', mainCtrl]);
     function mainCtrl($http){
+        //Conjunto de variables 
         var vm = this;
         getTaskList();
         vm.spinner = true;
@@ -47,19 +48,23 @@
             add:true,
             edit:false
         }
-
+        //Función para activar el spinner de carga
         function spinnerActive(){
             vm.spinner = true;
         }
+        //Función para esconder el spinner de carga
         function spinnerHide(){
             vm.spinner = false;
         }
-     
+     //Función para regresar con el icono de flecha izquierda
         function goBack(){
             vm.steps.taskListMain = true;
             vm.steps.taskListIsOpen = false;
             vm.steps.viewTasks = false;
+            vm.toggleList = "checked";
+            vm.taskListAdd = "";
         }
+        //Función para verificar si la lista de tareas esta vacia
         function checkIfEmpty(){
             if(vm.taskListItems.length === 0){
                 vm.noTaskHere = true;
@@ -67,6 +72,7 @@
                 vm.noTaskHere = false;
             }
         }
+        //Función oara verificar si una lista esta vacia
         function checkIfEmptyList(){
             if(vm.taskListData.length === 0){
                 vm.noListHere = true;
@@ -74,6 +80,8 @@
                 vm.noListHere = false;
             }
         }
+
+        //Función para abrir una lista
         function openTaskList(id,name,tasks,index){
             vm.steps.taskListMain = false;
             vm.steps.taskListIsOpen = true;
@@ -86,6 +94,7 @@
 
             checkIfEmpty();
         }
+        //Función para validar si el input esta vacio
         function validateDisabled(){
             if(vm.taskListAdd !== "" || vm.taskListAdd !== undefined){
                 vm.disabled = false;
@@ -94,8 +103,10 @@
             }
         }
 
-       
+//-------------------------------------------------------------------------------------------------------
         //CONSUMO DE APIS
+//-------------------------------------------------------------------------------------------------------
+        //Servicio para mostrar el conjunto de listas
         function getTaskList(){
             spinnerActive();
             $http.get('http://front-test.tide.mx/api/task_lists').then(function(response){
@@ -111,6 +122,7 @@
             })
         }
       
+        //Srvicio para crear una lista
         function createList(){
             spinnerActive();
             $http.post('http://front-test.tide.mx/api/task_lists',{
@@ -128,6 +140,8 @@
                 spinnerHide();
             })
         }
+
+        //Función auxiliar para editar una lista
         function prepareEditingList(index,name,id){
             vm.taskListAdd = name;
             vm.toggleList = "edit";
@@ -136,6 +150,8 @@
             vm.flagList.add = false;
             vm.flagList.edit = true;
         }
+
+        //Función auxiliar para cambiar entre crear y editar una lista
         function toggleCreateList(){
             if(vm.flagList.add){
                 createList();
@@ -143,6 +159,8 @@
                 editList(vm.taskListEditingId);
             }
         } 
+
+        //Servicio para editar listas
         function editList(id){
             spinnerActive();
             $http.put('http://front-test.tide.mx/api/task_lists/' + id,{
@@ -157,6 +175,7 @@
             })
         }
 
+        //Servicio para borrar listas
         function deleteList(index,id){
             spinnerActive();
             $http.delete('http://front-test.tide.mx/api/task_lists/' + id).then(function(){
@@ -171,7 +190,7 @@
 
 
 
-
+        //Servicio para añadir tareas
           function addTask(){
             spinnerActive()
               $http.post('http://front-test.tide.mx/api/tasks',{
@@ -196,6 +215,7 @@
               })
           }
 
+          //Servicio para borrar tareas
           function deleteTask(index,id){
             spinnerActive();
               $http.delete('http://front-test.tide.mx/api/tasks/' + id).then(function(){
@@ -209,6 +229,7 @@
               })
           }
 
+          //Función auxiliar para editar tareas
           function prepareEditingTask(index,name,id){
             vm.taskName = name;
             vm.taskIndex = index;
@@ -218,6 +239,7 @@
             vm.flag.edit = true;
           }
 
+          //Servicio para editar tareas
           function editTask(id,endDate){
             spinnerActive();
             if(vm.isChecked){
@@ -251,6 +273,7 @@
             }
           }
 
+          //Servicio de Busqueda de tareas
           function retrieveTask(id){
             spinnerActive();
             $http.get('http://front-test.tide.mx/api/tasks',{
@@ -290,6 +313,7 @@
             })
           }
 
+          //Maneja el estado de las tareas terminada/no terminada
           function taskState(index,id,e){
               console.log(e);
               vm.isChecked = e.target.checked;
@@ -297,6 +321,7 @@
               vm.taskListItems[index].nowChecked = vm.isChecked;
             
           }
+          //Comprueba una tarea terminada
           function taskDone(index,id,name){
               vm.taskDoneId = id;
               vm.taskIndex = index;
