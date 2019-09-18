@@ -5,16 +5,22 @@
         getTaskList();
         vm.spinner = true;
         vm.disabled = true;
+        vm.isChecked;
+        vm.taskDone = taskDone;
+        vm.taskState = taskState;
         vm.spinnerActive = spinnerActive;
         vm.spinnerHide = spinnerHide;
         vm.validateDisabled = validateDisabled;
         vm.prepareEditingList = prepareEditingList;
-        vm.taskListData =[];
+        vm.taskListData = [];
+        vm.taskItemsDone = [];
+        vm.taskItemsPending = [];
         vm.addToggle = "add";
         vm.noTaskHere = false;
         vm.noListHere = false;
         vm.openTaskList = openTaskList;
         vm.toggleCreateList = toggleCreateList;
+        vm.goBack = goBack;
         vm.createList = createList;
         vm.editList = editList;
         vm.toggleList = "checked";
@@ -30,7 +36,8 @@
         vm.getTaskList = getTaskList;
         vm.steps = {
             taskListMain: true,
-            taskListIsOpen: false
+            taskListIsOpen: false,
+            viewTasks:false
         }
         vm.flag ={
             add:true,
@@ -48,7 +55,11 @@
             vm.spinner = false;
         }
      
-
+        function goBack(){
+            vm.steps.taskListMain = true;
+            vm.steps.taskListIsOpen = false;
+            vm.steps.viewTasks = false;
+        }
         function checkIfEmpty(){
             if(vm.taskListItems.length === 0){
                 vm.noTaskHere = true;
@@ -64,15 +75,15 @@
             }
         }
         function openTaskList(id,name,tasks,index){
-            console.log(index);
-            vm.steps.taskListIsOpen = true;
             vm.steps.taskListMain = false;
-
+            vm.steps.taskListIsOpen = true;
+            vm.steps.viewTasks = false;
+            vm.addToggle = "add";
+            vm.taskName = "";
             vm.taskListID = id; 
             vm.taskListName = name;
             vm.taskListItems = tasks;
 
-            console.log(vm.taskListItems.length);
             checkIfEmpty();
         }
         function validateDisabled(){
@@ -88,7 +99,6 @@
         function getTaskList(){
             spinnerActive();
             $http.get('http://front-test.tide.mx/api/task_lists').then(function(response){
-                console.log(response.data);
                    angular.forEach(response.data, function(val){
                        vm.taskListData.push({
                            id:val.id,
@@ -97,7 +107,6 @@
                            tasks:val.tasks
                        })
                    })
-                   console.log(vm.taskListData)
                    spinnerHide()
             })
         }
@@ -139,7 +148,6 @@
             $http.put('http://front-test.tide.mx/api/task_lists/' + id,{
                 name:vm.taskListAdd
             }).then(function(response){
-                console.log(response.data);
                 vm.taskListData[vm.taskListIndex].name = vm.taskListAdd;
                 vm.flagList.add = true;
                 vm.flagList.edit = false;
@@ -153,6 +161,8 @@
             spinnerActive();
             $http.delete('http://front-test.tide.mx/api/task_lists/' + id).then(function(){
                 vm.taskListData.splice(index,1);
+                vm.toggleList = "checked";
+                vm.taskListAdd = "";
                 checkIfEmptyList();
                 spinnerHide();
             })
@@ -168,13 +178,14 @@
                   name:vm.taskName,
                   taskList:vm.taskListID,
                   limitDate:moment().add(3,'week').format('YYYY-MM-DD'),
-                  endDate:moment().format()
+                  endDate: null
               }).then(function(response){
                   var _res = response.data;
                     vm.taskListItems.push({
                         name: _res.name,
                         creationDate: _res.creationDate,
                         limitDate: _res.limitDate,
+                        endDate: _res.endDate,
                         id:_res.id
                     })
                     checkIfEmpty();
@@ -189,6 +200,10 @@
             spinnerActive();
               $http.delete('http://front-test.tide.mx/api/tasks/' + id).then(function(){
                 vm.taskListItems.splice(index,1);
+                vm.addToggle = "add";
+                vm.flag.add = true;
+                vm.flag.edit = false;
+                vm.taskName = "";
                 checkIfEmpty();
                 spinnerHide();
               })
@@ -203,16 +218,22 @@
             vm.flag.edit = true;
           }
 
-          function editTask(id){
+          function editTask(id,endDate){
             spinnerActive();
+            if(vm.isChecked){
+                endDate
+            }else{
+                endDate = null
+            }
                $http.put('http://front-test.tide.mx/api/tasks/' + id,{
                    name: vm.taskName,
                    taskList: vm.taskListID,
                    limitDate: moment().add(3,'week').format('YYYY-MM-DD'),
-                   endDate: moment().format()
+                   endDate: endDate
                  }).then(function(response){
                     var _resUpdate = response.data
                     vm.taskListItems[vm.taskIndex].name = _resUpdate.name
+                    vm.taskListItems[vm.taskIndex].endDate = _resUpdate.endDate
                     spinnerHide();
                     vm.addToggle = "add";
                     vm.taskName = "";
@@ -231,8 +252,56 @@
           }
 
           function retrieveTask(id){
-            $http.get('http://front-test.tide.mx/api/tasks/' + id).then(function(response){
+            spinnerActive();
+            $http.get('http://front-test.tide.mx/api/tasks',{
+               page:id 
+            }).then(function(response){
                 console.log(response.data);
+                vm.taskItemsDone = [];
+                vm.taskItemsPending = [];
+                angular.forEach(response.data, function(val){
+                    console.log(val.endDate);
+                    if( val.endDate !== null){
+                        vm.taskItemsDone.push({
+                            id:val.id,
+                            creationDate: val.creationDate,
+                            limitDate: val.limitDate,
+                            endDate:val.endDate,
+                            name:val.name,
+                            taskList:val.taskList
+                        })
+                    }else{
+                        vm.taskItemsPending.push({
+                            id:val.id,
+                            creationDate: val.creationDate,
+                            limitDate: val.limitDate,
+                            endDate:val.endDate,
+                            name:val.name,
+                            taskList:val.taskList
+                        })
+                    }
+                })
+                console.log(vm.taskItemsDone);
+                console.log(vm.taskItemsPending);
+                spinnerHide();
+                vm.steps.taskListMain = false;
+                vm.steps.taskListIsOpen = false;
+                vm.steps.viewTasks = true;
             })
+          }
+
+          function taskState(index,id,e){
+              console.log(e);
+              vm.isChecked = e.target.checked;
+              console.log(vm.isChecked);
+              vm.taskListItems[index].nowChecked = vm.isChecked;
+            
+          }
+          function taskDone(index,id,name){
+              vm.taskDoneId = id;
+              vm.taskIndex = index;
+              vm.taskName = name;
+              vm.endDate = moment().format();
+              editTask(vm.taskDoneId,vm.endDate);
           }
     }

@@ -16,12 +16,21 @@
                 <div ng-show="appCtrl.spinner" id="spinner"></div>
             </div>
             <nav class="wrapper__header">
-                <form name="validateListForm" novalidate class="wrapper__header-form">
+                <div ng-click="appCtrl.goBack()" class="left__arrow">
+                    <img class="left__arrow-img" src="assets/leftArrow-icon.svg" alt="back">
+                </div>
+                <div ng-if= "!appCtrl.steps.taskListMain" class="title__toDoList">
+                    <h1>TO DO LIST</h1>
+                </div>
+                <form ng-if= "appCtrl.steps.taskListMain" name="validateListForm" novalidate class="wrapper__header-form">
                     <input required minlength="1" maxlength="30" ng-model="appCtrl.taskListAdd" type="text" class="wrapper__header-input" placeholder="Crea una lista...">
                     <button ng-disabled="validateListForm.$invalid" ng-click="appCtrl.toggleCreateList();" class="create__tasklist">
                         <img class="wrapper__header-icon--image" src="assets/{{appCtrl.toggleList}}-icon.svg" alt="confirm">
                     </button>
                 </form>
+                <div  class="view__tasks">
+                    <button ng-click="appCtrl.retrieveTask(1)" class="view__tasks-btn">Ver Tareas</button>
+                </div>
             </nav>
             <section ng-if= "appCtrl.steps.taskListMain" class="card__wrapper">
                 <h2 ng-if="appCtrl.noListHere" class="task__card-empty">Agrega algo aqui...</h2>
@@ -40,7 +49,7 @@
             <section ng-if="appCtrl.steps.taskListIsOpen" class="task">
                 <form name = "formTask">
                 <div class="task__name">
-                    <input required ng-model="appCtrl.taskListName" type="text" class="task__name-input" placeholder="Nombre de la lista...">
+                    <input readonly ng-model="appCtrl.taskListName" type="text" class="task__name-input" placeholder="Nombre de la lista...">
                 </div>
                 <div class="task__add">
                     <input required minlength="1" maxlength="30" ng-model="appCtrl.taskName" type="text" class="task__add-input" placeholder="Que no se te olvide...">
@@ -54,8 +63,8 @@
                 <h2 ng-if="appCtrl.noTaskHere" class="task__card-empty">Agrega algo aqui...</h2>
                 <div class="task__card" ng-repeat="task in appCtrl.taskListItems">
                     <div class="task__card--checked">
-                        <input class="task__card-checkbox" id="task__card-checkbox--{{task.id}}" type="checkbox">
-                        <label class="task__card-label" for="task__card-checkbox--{{task.id}}">
+                        <input  ng-click = "appCtrl.taskState($index,task.id,$event);appCtrl.taskDone($index,task.id,task.name)" class="task__card-checkbox" id="task__card-checkbox--{{task.id}}" type="checkbox">
+                        <label  ng-class="{isChecked: appCtrl.taskListItems[$index].nowChecked}" class="task__card-label" for="task__card-checkbox--{{task.id}}">
                             <img class="task__card--checked-img" src="assets/checked-icon.svg" alt="checked">
                         </label>
                     </div>
@@ -70,6 +79,38 @@
                     <div class="task__card--delete" ng-click ="appCtrl.deleteTask($index,task.id)">
                         <img class="task__card--delete-img" src="assets/delete-icon.svg" alt="delete">
                     </div>
+                </div>
+            </section>
+            <section ng-if = "appCtrl.steps.viewTasks" class="task__complete">
+                <h1>Si completar</h1>
+                <div class="task__card--retrieve" ng-repeat="penTask in appCtrl.taskItemsPending">
+                        <!-- <div class="task__card--checked">
+                            <input class="task__card-checkbox" id="task__card-checkbox--{{penTask.id}}" type="checkbox">
+                            <label class="task__card-label" for="task__card-checkbox--{{penTask.id}}">
+                                <img class="task__card--checked-img" src="assets/checked-icon.svg" alt="checked">
+                            </label>
+                        </div> -->
+                        <div class="task__card--info-retrieve">
+                            <p class="task__card--info-date">{{penTask.creationDate | date: yMMdd}}</p>
+                            <p class="task__card--info-deadLine">{{penTask.limitDate | date: yMMdd}}</p>
+                            <p class="task__card--info-name">{{penTask.name}}</p>
+                        </div>
+                </div>
+            </section>
+            <section ng-if = "appCtrl.steps.viewTasks" class="task__pending">
+                <h1>Completado</h1>
+                <div class="task__card--retrieve" ng-repeat="doneTask in appCtrl.taskItemsDone">
+                        <!-- <div class="task__card--checked">
+                            <input class="task__card-checkbox" id="task__card-checkbox--{{doneTask.id}}" type="checkbox">
+                            <label class="task__card-label" for="task__card-checkbox--{{doneTask.id}}">
+                                <img class="task__card--checked-img" src="assets/checked-icon.svg" alt="checked">
+                            </label>
+                        </div> -->
+                        <div class="task__card--info-retrieve">
+                            <p class="task__card--info-date">{{doneTask.creationDate | date: yMMdd}}</p>
+                            <p class="task__card--info-deadLine">{{doneTask.limitDate | date: yMMdd}}</p>
+                            <p class="task__card--info-namePending">{{doneTask.name}}</p>
+                        </div>
                 </div>
             </section>
         </div>
